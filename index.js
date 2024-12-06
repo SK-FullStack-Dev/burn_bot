@@ -55,8 +55,8 @@ function parseTransferInput(input) {
 app.post("/webhook", async (req, res) => {
   try {
     const webhook = req.body;
-    console.log(webhook.txs[0].hash)
-    console.log(webhook.txs[0].input)
+    // console.log(webhook.txs[0].hash)
+    // console.log(webhook.txs[0].input)
 
     // Process each NFT transfer
     for (const ToadTransfer of webhook.txs) {
@@ -92,8 +92,8 @@ app.post("/webhook", async (req, res) => {
 
         // Construct caption
         const caption =
-          `🔥 Frog Soup Cafe just burnt ${transferDetails.amount} $TOAD ($${totaBurnlValueUSD}) 🔥\n` +
-          `\n🔥 Total burned ${balanceInWholeNumber} $TOAD ( $${totalValueUSD})\n` +
+          `🔥 Frog Soup Cafe just burnt *${transferDetails.amount}* $TOAD ($${totaBurnlValueUSD}) 🔥\n` +
+          `\n🔥 Total burned *${balanceInWholeNumber}* $TOAD ( $${totalValueUSD})\n` +
           `\n` +
           `Transaction Hash: https://etherscan.io/tx/${ToadTransfer.hash} \n\n` +
           `🐸🍲 Mint Frog Soup: https://www.frogsoupcafe.fun/`;
