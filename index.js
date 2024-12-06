@@ -110,7 +110,7 @@ app.post("/webhook", async (req, res) => {
         console.error('Error processing NFT metadata:', metadataError);
         
         // Optional: Send error notification to Telegram
-        await bot.sendMessage(CHAT_ID, `Error processing NFT ${ToadTransfer.hash}: ${metadataError.message}`);
+        // await bot.sendMessage(CHAT_ID, `Error processing NFT ${ToadTransfer.hash}: ${metadataError.message}`);
       }
     }
 
