@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
+const axios = require('axios');
 const app = express();
 const port = 5001;
 const ethers = require('ethers');
@@ -26,18 +27,22 @@ const processedTransactions = new Set();
 // Express Middleware
 app.use(express.json());
 
+// Function to get token price in USD
+async function getTokenPriceUSD(contractAddress) {
+  try {
+    const response = await axios.get(`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`);
+    return response.data[contractAddress.toLowerCase()]?.usd || 0;
+  } catch (error) {
+    console.error('Error fetching token price:', error);
+    return 0;
+  }
+}
+
 // Function to parse ERC20 transfer input
 function parseTransferInput(input) {
-  // Remove the method signature (first 10 characters)
   const dataWithoutMethodSig = input.slice(10);
-  
-  // Extract recipient address (20 bytes = 40 hex characters)
   const recipientAddress = '0x' + dataWithoutMethodSig.slice(24, 64);
-  
-  // Extract amount (last 32 bytes)
   const hexAmount = '0x' + dataWithoutMethodSig.slice(64);
-  
-  // Convert to decimal (assuming 18 decimals)
   const decimalAmount = BigInt(hexAmount) / BigInt(10 ** 18);
   
   return {
@@ -78,10 +83,18 @@ app.post("/webhook", async (req, res) => {
         const balance = await contract.balanceOf(address);
         const balanceInWholeNumber = ethers.formatUnits(balance, 18).split('.')[0];
 
+        // Get token price in USD
+        const tokenPriceUSD = await getTokenPriceUSD(contractAddress);
+        
+        // Calculate total value in USD
+        const totalValueUSD = (Number(balanceInWholeNumber) * tokenPriceUSD).toFixed(2);
+        const totaBurnlValueUSD = (Number(transferDetails.amount) * tokenPriceUSD).toFixed(2);
+
         // Construct caption
         const caption =
-          `🔥 Frog Soup Cafe just burnt $TOAD *${transferDetails.amount}*! 🔥\n` +
-          `\n🔥 Total $TOAD burned: $TOAD *${balanceInWholeNumber}*\n\n` +
+          `🔥 Frog Soup Cafe just burnt ${transferDetails.amount} $TOAD ($${totaBurnlValueUSD}) 🔥\n` +
+          `\n🔥 Total burned ${balanceInWholeNumber} $TOAD ( $${totalValueUSD})\n` +
+          `\n` +
           `Transaction Hash: https://etherscan.io/tx/${ToadTransfer.hash} \n\n` +
           `🐸🍲 Mint Frog Soup: https://www.frogsoupcafe.fun/`;
 
