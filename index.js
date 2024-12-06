@@ -3,7 +3,7 @@ const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 const axios = require('axios');
 const app = express();
-const port = 5001;
+const port = 5002;
 const ethers = require('ethers');
 const abi = require('./abi.json');
 
